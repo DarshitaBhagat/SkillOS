@@ -1,21 +1,40 @@
 import sounddevice as sd
 import numpy as np
+import librosa
+import math
+
+samplerate = 44100
+
+def freq_to_note(freq):
+    if freq <= 0:
+        return None
+
+    midi = round(12 * math.log2(freq / 440.0) + 69)
+
+    notes = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+    note = notes[midi % 12]
+    octave = midi // 12 - 1
+
+    return f"{note}{octave}"
 
 def audio_callback(indata, frames, time, status):
-    if status:
-        print(status)
 
-    audio = indata[:, 0]
+    audio = indata[:,0]
 
-    rms = np.sqrt(np.mean(audio**2))
-    peak = np.max(np.abs(audio))
+    f0 = librosa.yin(audio,
+                     fmin=70,
+                     fmax=500,
+                     sr=samplerate)
 
-    print(f"RMS: {rms:.4f} | Peak: {peak:.4f}")
+    freq = np.mean(f0)
 
-print("Mic stream started")
+    note = freq_to_note(freq)
+
+    print(f"Freq: {freq:.2f} Hz | Note: {note}")
 
 with sd.InputStream(callback=audio_callback,
                     channels=1,
-                    samplerate=44100,
-                    blocksize=2048):
-    input("Press Enter to stop\n")
+                    samplerate=samplerate,
+                    blocksize=4096):
+
+    input("Listening...\n")
