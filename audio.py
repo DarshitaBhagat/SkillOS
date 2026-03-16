@@ -21,6 +21,16 @@ def freq_to_note(freq):
 
     return notes[midi % 12]
 
+last_note = None
+
+def print_note(note):
+
+        global last_note
+
+        if note != last_note:
+            print("Detected:", note)
+            last_note = note
+
 
 def audio_callback(indata, frames, time, status):
 
@@ -51,7 +61,10 @@ def audio_callback(indata, frames, time, status):
 
     note = freq_to_note(stable_freq)
 
-    print(f"{stable_freq:.2f} Hz | {note}")
+    
+    print_note(note)
+
+    
 
 
 with sd.InputStream(callback=audio_callback,
