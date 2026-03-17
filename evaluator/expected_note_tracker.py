@@ -17,3 +17,12 @@ class ExpectedNoteTracker:
             return self.notes[index]
 
         return None
+    
+    def get_expected_time(self):
+
+        time_passed = time.time() - self.start_time
+        beat_duration = 60 / self.tempo
+
+        index = int(time_passed / beat_duration)
+
+        return self.start_time + index * beat_duration

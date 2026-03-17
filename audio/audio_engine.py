@@ -74,6 +74,7 @@ class AudioEngine:
         note = self.freq_to_note(stable_freq)
 
         # store result
+        
         self.current_note = note
 
 
@@ -97,5 +98,4 @@ class AudioEngine:
 
 
     def get_detected_note(self):
-
         return self.current_note

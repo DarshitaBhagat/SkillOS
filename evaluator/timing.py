@@ -1,11 +1,14 @@
-def timing_error(expected_time, actual_time):
+class timing_error:
 
-    error = actual_time - expected_time
 
-    if abs(error) < 0.2:
-        return "perfect"
+    def timing_error(expected_time, actual_time):
 
-    if error < 0:
-        return "early"
+        error = actual_time - expected_time
 
-    return "late"
+        if abs(error) < 0.2:
+            return "perfect"
+
+        if error < 0:
+            return "early"
+
+        return "late"
