@@ -8,7 +8,7 @@ from evaluator.metrics import SessionMetrics
 from evaluator.event import Event
 from evaluator.timing import timing_error
 from storage.db import Database
-from ui.ui import UI
+from ui.interface import UI
 
 
 import os
@@ -36,7 +36,7 @@ print("Starting practice...")
 
 
 last_note = None
-event_buffer = []
+
 
 PROCESS_INTERVAL = 0.3
 last_process_time = 0
@@ -59,8 +59,7 @@ try:
         last_process_time = current_time
 
         detected = audio.process_pitch()
-        expected = tracker.get_expected_note()
-        expected_time = tracker.get_expected_time()
+        expected, expected_time = tracker.get_current()
 
         if detected and expected:
 
@@ -73,13 +72,14 @@ try:
 
                 metrics.record(correct_note)
 
-                event_buffer.append((
-                                expected,
-                                event.note,
-                                event.timestamp,
-                                timing,
-                                correct_note
-                            ))
+                db.insert_event(
+                    session_id,
+                    expected,
+                    event.note,
+                    event.timestamp,
+                    timing,
+                    correct_note
+                )
 
                 
 
@@ -98,8 +98,6 @@ except KeyboardInterrupt:
     pass
 
 
-for e in event_buffer:
-    db.insert_event(session_id, *e)
 accuracy = metrics.accuracy()
 
 print("\nSession ended")

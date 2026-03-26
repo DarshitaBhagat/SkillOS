@@ -3,11 +3,14 @@ import numpy as np
 import librosa
 import math
 from collections import deque
+import threading
 
 
 class AudioEngine:
 
     def __init__(self):
+
+        self.lock = threading.Lock()
 
         # audio settings
         self.samplerate = 22050
@@ -52,14 +55,17 @@ class AudioEngine:
         if rms < 0.02:
             return
 
-        # update rolling buffer
-        self.buffer = np.roll(self.buffer, -len(audio))
-        self.buffer[-len(audio):] = audio
+        with self.lock:
+            self.buffer = np.roll(self.buffer, -len(audio))
+            self.buffer[-len(audio):] = audio
 
     def process_pitch(self):
 
+        with self.lock:
+            buffer_copy = self.buffer.copy()
+
         f0 = librosa.yin(
-            self.buffer,
+            buffer_copy,
             fmin=80,
             fmax=1000,
             sr=self.samplerate
