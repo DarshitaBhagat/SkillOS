@@ -10,7 +10,7 @@ from evaluator.timing import timing_error
 from storage.db import Database
 
 # load exercise
-with open("../exercises/e_major_scale.json") as f:
+with open("FOSSHACK26/exercises/e_major.json") as f:
     exercise = json.load(f)
 
 
