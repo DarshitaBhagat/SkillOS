@@ -8,10 +8,10 @@ from evaluator.metrics import SessionMetrics
 from evaluator.event import Event
 from evaluator.timing import timing_error
 from storage.db import Database
+from ui.ui import UI
 
-# load exercise
+
 import os
-import json
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -26,7 +26,10 @@ tracker = ExpectedNoteTracker(exercise)
 evaluator = Evaluator()
 metrics = SessionMetrics()
 db = Database()
+ui = UI()
+
 session_id = db.start_session()
+
 audio.start()
 
 print("Starting practice...")
@@ -34,9 +37,25 @@ print("Starting practice...")
 
 last_note = None
 
+PROCESS_INTERVAL = 0.2
+last_process_time = 0
+
+running = True
+
 try:
 
-    while True:
+    while running:
+
+        # handle window close
+        running = ui.handle_events()
+
+        current_time = time.time()
+
+        if current_time - last_process_time < PROCESS_INTERVAL:
+            time.sleep(0.01)
+            continue
+
+        last_process_time = current_time
 
         detected = audio.get_detected_note()
         expected = tracker.get_expected_note()
@@ -49,31 +68,37 @@ try:
                 event = Event(detected, time.time())
 
                 correct_note = evaluator.evaluate(expected, event.note)
-
                 timing = timing_error(expected_time, event.timestamp)
 
                 metrics.record(correct_note)
-                db.insert_event(
-                    session_id,
+
+                
+
+                ui.draw(
                     expected,
                     event.note,
-                    event.timestamp,
+                    correct_note,
                     timing,
-                    correct_note
-                )   
-                print(
-                    f"Expected: {expected} | "
-                    f"Detected: {event.note} | "
-                    f"Timing: {timing} | "
-                    f"Correct Note: {correct_note}"
+                    tracker.tempo
                 )
 
-                last_note = detected
-        time.sleep(0.05)
+
+
 
 except KeyboardInterrupt:
+    pass
 
-    print("\nSession ended")
-    print(f"Accuracy: {metrics.accuracy():.2f}%")
-    db.end_session(session_id, metrics.accuracy())
-    audio.stop()
+
+
+accuracy = metrics.accuracy()
+
+print("\nSession ended")
+print(f"Accuracy: {accuracy:.2f}%")
+
+db.end_session(session_id, accuracy)
+
+ui.show_summary(accuracy)
+
+time.sleep(3)
+
+audio.stop()
