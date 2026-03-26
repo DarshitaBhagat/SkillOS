@@ -10,8 +10,8 @@ class AudioEngine:
     def __init__(self):
 
         # audio settings
-        self.samplerate = 44100
-        self.blocksize = 512
+        self.samplerate = 22050
+        self.blocksize = 2048
 
         # rolling buffer for pitch detection
         self.buffer = np.zeros(8192)

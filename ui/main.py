@@ -10,7 +10,14 @@ from evaluator.timing import timing_error
 from storage.db import Database
 
 # load exercise
-with open("FOSSHACK26/exercises/e_major.json") as f:
+import os
+import json
+
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+exercise_path = os.path.join(BASE_DIR, "exercises", "e_major.json")
+
+with open(exercise_path) as f:
     exercise = json.load(f)
 
 
