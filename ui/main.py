@@ -36,8 +36,9 @@ print("Starting practice...")
 
 
 last_note = None
+event_buffer = []
 
-PROCESS_INTERVAL = 0.2
+PROCESS_INTERVAL = 0.3
 last_process_time = 0
 
 running = True
@@ -57,7 +58,7 @@ try:
 
         last_process_time = current_time
 
-        detected = audio.get_detected_note()
+        detected = audio.process_pitch()
         expected = tracker.get_expected_note()
         expected_time = tracker.get_expected_time()
 
@@ -71,6 +72,14 @@ try:
                 timing = timing_error(expected_time, event.timestamp)
 
                 metrics.record(correct_note)
+
+                event_buffer.append((
+                                expected,
+                                event.note,
+                                event.timestamp,
+                                timing,
+                                correct_note
+                            ))
 
                 
 
@@ -89,7 +98,8 @@ except KeyboardInterrupt:
     pass
 
 
-
+for e in event_buffer:
+    db.insert_event(session_id, *e)
 accuracy = metrics.accuracy()
 
 print("\nSession ended")

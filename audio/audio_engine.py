@@ -17,7 +17,7 @@ class AudioEngine:
         self.buffer = np.zeros(8192)
 
         # stabilization buffer
-        self.pitch_buffer = deque(maxlen=5)
+        self.pitch_buffer = deque(maxlen=8)
 
         # latest detected note
         self.current_note = None
@@ -49,14 +49,15 @@ class AudioEngine:
 
         # silence detection
         rms = np.sqrt(np.mean(audio**2))
-        if rms < 0.01:
+        if rms < 0.02:
             return
 
         # update rolling buffer
         self.buffer = np.roll(self.buffer, -len(audio))
         self.buffer[-len(audio):] = audio
 
-        # pitch detection
+    def process_pitch(self):
+
         f0 = librosa.yin(
             self.buffer,
             fmin=80,
@@ -64,7 +65,10 @@ class AudioEngine:
             sr=self.samplerate
         )
 
-        freq = np.mean(f0)
+        freq = np.median(f0)
+
+        if freq <= 0 or np.isnan(freq):
+            return None
 
         # stabilization smoothing
         self.pitch_buffer.append(freq)
@@ -76,6 +80,8 @@ class AudioEngine:
         # store result
         
         self.current_note = note
+
+        return note
 
 
     def start(self):
