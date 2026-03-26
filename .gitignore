@@ -1,0 +1,17 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+
+# Database
+*.db
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
