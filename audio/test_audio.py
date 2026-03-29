@@ -9,12 +9,10 @@ print("Listening... Play your guitar")
 
 try:
 
-    while True:
-
-        note = audio.get_detected_note()
-
-        if note:
-            print("Detected:", note)
+   while True:
+    note = audio.process_pitch()
+    if note:
+        print("Detected:", note)
 
         time.sleep(0.1)
 

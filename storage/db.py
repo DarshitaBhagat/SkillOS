@@ -2,6 +2,7 @@ import sqlite3
 import time
 class Database:
     def __init__(self, db_name="skillos.db"):
+        self.start_time = None
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self.create_tables()
