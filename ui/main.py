@@ -1,5 +1,7 @@
 import time
 import json
+import os
+import glob
 
 from audio.audio_engine import AudioEngine
 from evaluator.expected_note_tracker import ExpectedNoteTracker
@@ -11,43 +13,52 @@ from storage.db import Database
 from ui.interface import UI
 
 
-import os
-
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+EXERCISES_DIR = os.path.join(BASE_DIR, "exercises")
 
-exercise_path = os.path.join(BASE_DIR, "exercises", "e_major.json")
 
-with open(exercise_path) as f:
-    exercise = json.load(f)
+def load_exercise_list():
+
+    paths = sorted(glob.glob(os.path.join(EXERCISES_DIR, "*.json")))
+    exercises = []
+    for path in paths:
+        with open(path) as f:
+            data = json.load(f)
+        exercises.append((data.get("name", os.path.basename(path)), path))
+    return exercises
 
 
 audio = AudioEngine()
+db = Database()
+ui = UI()
+
+
+exercise_list = load_exercise_list()
+chosen_path = ui.show_exercise_menu(exercise_list)
+
+with open(chosen_path) as f:
+    exercise = json.load(f)
+
+
+ui.show_countdown()
+
+
 tracker = ExpectedNoteTracker(exercise)
 evaluator = Evaluator()
 metrics = SessionMetrics()
-db = Database()
-ui = UI()
 
 session_id = db.start_session()
 
 audio.start()
 
-print("Starting practice...")
-
-
-last_note = None
-
+print(f"Starting practice: {exercise['name']}")
 
 PROCESS_INTERVAL = 0.3
 last_process_time = 0
-
 running = True
 
 try:
-
     while running:
-
-        # handle window close
         running = ui.handle_events()
 
         current_time = time.time()
@@ -62,9 +73,7 @@ try:
         expected, expected_time = tracker.get_current()
 
         if detected and expected:
-
-            if detected != last_note:
-
+                
                 event = Event(detected, time.time())
 
                 correct_note = evaluator.evaluate(expected, event.note)
@@ -81,8 +90,6 @@ try:
                     correct_note
                 )
 
-                
-
                 ui.draw(
                     expected,
                     event.note,
@@ -91,12 +98,8 @@ try:
                     tracker.tempo
                 )
 
-
-
-
 except KeyboardInterrupt:
     pass
-
 
 accuracy = metrics.accuracy()
 

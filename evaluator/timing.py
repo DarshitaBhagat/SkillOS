@@ -1,6 +1,3 @@
-
-
-
 def timing_error(expected_time, actual_time):
 
     error = actual_time - expected_time
