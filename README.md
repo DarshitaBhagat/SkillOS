@@ -70,7 +70,7 @@ SkillOS/
 │   └── fonts
 │       ├── Monsterrat-Regular
 │       ├── Orbitron-Regular
-│       ├── Poppins-Regular     
+│       └── Poppins-Regular     
 ├── audio/
 │   └── audio_engine.py            # Mic capture, pitch detection, note conversion
 ├── evaluator/
