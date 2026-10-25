@@ -10,6 +10,11 @@ venv/
 # Database
 *.db
 
+# Test audio binaries
+test_audios/
+audio/generate_test_audio.py
+audio/test_audio_file.py
+
 # VS Code
 .vscode/
 
